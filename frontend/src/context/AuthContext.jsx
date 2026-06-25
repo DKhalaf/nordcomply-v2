@@ -57,7 +57,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('nordcomply_user');
     // Optional: Call Google logout
     if (window.google) {
-      google.accounts.id.disableAutoSelect();
+      window.google.accounts.id.disableAutoSelect();
     }
   };
 

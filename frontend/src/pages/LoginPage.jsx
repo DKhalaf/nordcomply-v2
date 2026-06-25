@@ -10,7 +10,7 @@ export default function LoginPage() {
   useEffect(() => {
     // Initialize Google Sign-In button
     if (window.google) {
-      google.accounts.id.initialize({
+      window.google.accounts.id.initialize({
         client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID || '742410486050-your-client-id.apps.googleusercontent.com',
         callback: (response) => {
           handleLogin(response);
@@ -21,7 +21,7 @@ export default function LoginPage() {
       });
 
       // Render the button
-      google.accounts.id.renderButton(
+      window.google.accounts.id.renderButton(
         document.getElementById('google-signin-button'),
         {
           theme: 'filled_black',
