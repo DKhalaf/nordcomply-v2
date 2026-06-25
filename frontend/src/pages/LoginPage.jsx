@@ -11,7 +11,7 @@ export default function LoginPage() {
     // Initialize Google Sign-In button
     if (window.google) {
       window.google.accounts.id.initialize({
-        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID || '742410486050-your-client-id.apps.googleusercontent.com',
+        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
         callback: (response) => {
           handleLogin(response);
           navigate('/dashboard');
