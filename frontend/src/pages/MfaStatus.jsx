@@ -1,129 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
-const mfaStyles = `
-  .mfa-status {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .mfa-status h2 {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text-primary, #1f2937);
-    margin-bottom: 8px;
-  }
-
-  .mfa-subtitle {
-    color: var(--text-secondary, #4b5563);
-    margin-bottom: 24px;
-    font-size: 15px;
-  }
-
-  .mfa-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 32px;
-  }
-
-  .mfa-stat-card {
-    background: var(--bg-light, #f9fafb);
-    border: 1px solid var(--border-color, #e5e7eb);
-    border-radius: 8px;
-    padding: 20px;
-  }
-
-  .mfa-stat-label {
-    font-size: 13px;
-    color: var(--text-muted, #9ca3af);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
-  }
-
-  .mfa-stat-value {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--primary-color, #2563eb);
-  }
-
-  .mfa-table-container {
-    background: white;
-    border: 1px solid var(--border-color, #e5e7eb);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-
-  .mfa-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-  }
-
-  .mfa-table thead {
-    background-color: var(--bg-light, #f9fafb);
-    border-bottom: 1px solid var(--border-color, #e5e7eb);
-  }
-
-  .mfa-table th {
-    padding: 12px 16px;
-    text-align: left;
-    font-weight: 600;
-    color: var(--text-primary, #1f2937);
-    text-transform: uppercase;
-    font-size: 12px;
-    letter-spacing: 0.5px;
-  }
-
-  .mfa-table tbody tr {
-    border-bottom: 1px solid var(--border-color, #e5e7eb);
-    transition: background-color 0.2s;
-  }
-
-  .mfa-table tbody tr:hover {
-    background-color: var(--bg-light, #f9fafb);
-  }
-
-  .mfa-table td {
-    padding: 12px 16px;
-    color: var(--text-secondary, #4b5563);
-  }
-
-  .mfa-badge-enabled {
-    display: inline-block;
-    background-color: #d1fae5;
-    color: #065f46;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  .mfa-badge-disabled {
-    display: inline-block;
-    background-color: #fee2e2;
-    color: #7f1d1d;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  .mfa-error {
-    background: #fee2e2;
-    color: #7f1d1d;
-    padding: 16px;
-    border-radius: 8px;
-    border: 1px solid #fecaca;
-  }
-
-  .mfa-loading {
-    text-align: center;
-    color: var(--text-secondary, #4b5563);
-    padding: 32px;
-  }
-`;
+import './styles.css';
 
 export default function MfaStatus({ tenantId, tenantName }) {
   const [data, setData] = useState(null);
@@ -141,7 +17,9 @@ export default function MfaStatus({ tenantId, tenantName }) {
         const result = await response.json();
 
         if (result.error) {
-          setError(result.error);
+          setError(typeof result.error === 'string' ? result.error : JSON.stringify(result.error));
+        } else if (result.totalUsers === undefined) {
+          setError('MFA data not available');
         } else {
           setData(result);
         }
@@ -156,14 +34,12 @@ export default function MfaStatus({ tenantId, tenantName }) {
 
   return (
     <div className="mfa-status">
-      <style>{mfaStyles}</style>
       <div>
         <h2>MFA Status - {tenantName}</h2>
         <p className="mfa-subtitle">Multi-factor authentication adoption across users</p>
       </div>
 
       {loading && <p className="mfa-loading">Indlæser...</p>}
-
       {error && <div className="mfa-error">{error}</div>}
 
       {data && !loading && (
@@ -183,7 +59,7 @@ export default function MfaStatus({ tenantId, tenantName }) {
             </div>
           </div>
 
-          {data.users.length > 0 && (
+          {data.users && data.users.length > 0 ? (
             <div className="mfa-table-container">
               <table className="mfa-table">
                 <thead>
@@ -210,6 +86,8 @@ export default function MfaStatus({ tenantId, tenantName }) {
                 </tbody>
               </table>
             </div>
+          ) : (
+            <div className="mfa-empty">No users found</div>
           )}
         </>
       )}

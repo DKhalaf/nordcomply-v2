@@ -1,142 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
-const caStyles = `
-  .conditional-access {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .conditional-access h2 {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text-primary, #1f2937);
-    margin-bottom: 8px;
-  }
-
-  .ca-subtitle {
-    color: var(--text-secondary, #4b5563);
-    margin-bottom: 24px;
-    font-size: 15px;
-  }
-
-  .ca-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 32px;
-  }
-
-  .ca-stat-card {
-    background: var(--bg-light, #f9fafb);
-    border: 1px solid var(--border-color, #e5e7eb);
-    border-radius: 8px;
-    padding: 20px;
-  }
-
-  .ca-stat-label {
-    font-size: 13px;
-    color: var(--text-muted, #9ca3af);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
-  }
-
-  .ca-stat-value {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--primary-color, #2563eb);
-  }
-
-  .ca-policies-container {
-    display: grid;
-    gap: 20px;
-  }
-
-  .ca-policy-card {
-    background: white;
-    border: 1px solid var(--border-color, #e5e7eb);
-    border-radius: 8px;
-    padding: 20px;
-  }
-
-  .ca-policy-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: 16px;
-  }
-
-  .ca-policy-name {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-primary, #1f2937);
-  }
-
-  .ca-state-badge-enabled {
-    background-color: #d1fae5;
-    color: #065f46;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  .ca-state-badge-disabled {
-    background-color: #fee2e2;
-    color: #7f1d1d;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  .ca-policy-details {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-  }
-
-  .ca-detail-item {
-    background: var(--bg-light, #f9fafb);
-    padding: 12px;
-    border-radius: 6px;
-  }
-
-  .ca-detail-label {
-    font-size: 12px;
-    color: var(--text-muted, #9ca3af);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
-  }
-
-  .ca-detail-value {
-    font-size: 14px;
-    color: var(--text-primary, #1f2937);
-    font-weight: 500;
-  }
-
-  .ca-error {
-    background: #fee2e2;
-    color: #7f1d1d;
-    padding: 16px;
-    border-radius: 8px;
-    border: 1px solid #fecaca;
-  }
-
-  .ca-loading {
-    text-align: center;
-    color: var(--text-secondary, #4b5563);
-    padding: 32px;
-  }
-
-  .ca-empty {
-    text-align: center;
-    padding: 48px 32px;
-    color: var(--text-muted, #9ca3af);
-  }
-`;
+import './styles.css';
 
 export default function ConditionalAccess({ tenantId, tenantName }) {
   const [data, setData] = useState(null);
@@ -154,7 +17,9 @@ export default function ConditionalAccess({ tenantId, tenantName }) {
         const result = await response.json();
 
         if (result.error) {
-          setError(result.error);
+          setError(typeof result.error === 'string' ? result.error : JSON.stringify(result.error));
+        } else if (result.totalPolicies === undefined) {
+          setError('Conditional Access data not available');
         } else {
           setData(result);
         }
@@ -169,14 +34,12 @@ export default function ConditionalAccess({ tenantId, tenantName }) {
 
   return (
     <div className="conditional-access">
-      <style>{caStyles}</style>
       <div>
         <h2>Conditional Access - {tenantName}</h2>
         <p className="ca-subtitle">Conditional Access policies and their configurations</p>
       </div>
 
       {loading && <p className="ca-loading">Indlæser...</p>}
-
       {error && <div className="ca-error">{error}</div>}
 
       {data && !loading && (
@@ -192,11 +55,11 @@ export default function ConditionalAccess({ tenantId, tenantName }) {
             </div>
           </div>
 
-          {data.policies.length === 0 ? (
+          {data.policies && data.policies.length === 0 ? (
             <div className="ca-empty">
               <p>Ingen Conditional Access policies konfigureret</p>
             </div>
-          ) : (
+          ) : data.policies && data.policies.length > 0 ? (
             <div className="ca-policies-container">
               {data.policies.map((policy) => (
                 <div key={policy.id} className="ca-policy-card">
@@ -223,7 +86,7 @@ export default function ConditionalAccess({ tenantId, tenantName }) {
                     <div className="ca-detail-item">
                       <div className="ca-detail-label">Platforme</div>
                       <div className="ca-detail-value">
-                        {policy.conditions.platforms.length > 0
+                        {policy.conditions.platforms && policy.conditions.platforms.length > 0
                           ? policy.conditions.platforms.join(', ')
                           : 'Alle'}
                       </div>
@@ -231,7 +94,7 @@ export default function ConditionalAccess({ tenantId, tenantName }) {
                     <div className="ca-detail-item">
                       <div className="ca-detail-label">Grant Controls</div>
                       <div className="ca-detail-value">
-                        {policy.grantControls.builtInControls.length > 0
+                        {policy.grantControls && policy.grantControls.builtInControls && policy.grantControls.builtInControls.length > 0
                           ? policy.grantControls.builtInControls.join(', ')
                           : 'Ingen'}
                       </div>
@@ -240,7 +103,7 @@ export default function ConditionalAccess({ tenantId, tenantName }) {
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
         </>
       )}
     </div>
