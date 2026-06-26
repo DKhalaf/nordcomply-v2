@@ -409,3 +409,121 @@
     grid-template-columns: 1fr;
   }
 }
+/* Tab Navigation */
+.tab-navigation {
+  display: flex;
+  gap: 12px;
+  margin: 24px 0;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  padding-bottom: 12px;
+}
+
+.tab-button {
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #6b7280);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.tab-button:hover {
+  color: var(--text-primary, #1f2937);
+}
+
+.tab-button.active {
+  color: var(--primary-color, #2563eb);
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -13px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary-color, #2563eb);
+}
+
+/* Membership Table */
+.membership-table-container {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
+.membership-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.membership-table thead {
+  background-color: var(--bg-light, #f9fafb);
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.membership-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.membership-table tbody tr {
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  transition: background-color 0.2s;
+}
+
+.membership-table tbody tr:hover {
+  background-color: var(--bg-light, #f9fafb);
+}
+
+.membership-table td {
+  padding: 12px 16px;
+  color: var(--text-secondary, #4b5563);
+}
+
+.membership-table .user-email {
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--text-secondary, #4b5563);
+}
+
+.groups-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.group-badge {
+  display: inline-block;
+  background-color: var(--bg-light, #f3f4f6);
+  color: var(--text-secondary, #4b5563);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  white-space: nowrap;
+}
+
+.no-groups {
+  color: var(--text-muted, #9ca3af);
+  font-style: italic;
+}
+
+.detail-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.empty {
+  text-align: center;
+  color: var(--text-muted, #9ca3af);
+  padding: 24px;
+}
