@@ -1,140 +1,110 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import './Dashboard.css';
+import './styles.css';  // i stedet for './Dashboard.css'
+
+const API_BASE = 'https://nordcomply-api.dshvan5.workers.dev';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
   const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch tenants from API
     fetchTenants();
   }, []);
 
-  const fetchTenants = async () => {
+  async function fetchTenants() {
     try {
-      const response = await fetch('/api/tenants');
-      if (response.ok) {
-        const data = await response.json();
-        setTenants(data);
-      }
-    } catch (error) {
-      console.error('Error fetching tenants:', error);
+      const res = await fetch(`${API_BASE}/api/tenants`);
+      if (!res.ok) throw new Error('Failed');
+      const data = await res.json();
+      setTenants(data);
+    } catch (err) {
+      console.error('Error:', err);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  }
 
   return (
     <div className="dashboard">
-      {/* Navigation */}
-      <nav className="dashboard-nav">
-        <div className="dashboard-nav__inner">
-          <div className="dashboard-nav__brand">
-            <span>NordComply Portal</span>
-          </div>
-          <ul className="dashboard-nav__menu">
-            <li><a href="/dashboard" className="active">Dashboard</a></li>
-            <li><a href="/admin">Admin</a></li>
-          </ul>
-          <div className="dashboard-nav__user">
-            <img src={user?.picture} alt={user?.name} className="dashboard-nav__avatar" />
-            <span>{user?.name}</span>
-            <button onClick={handleLogout} className="dashboard-nav__logout">
-              Log ud
+      <div className="header">
+        <h1>Dashboard</h1>
+        <p>Oversigt over dine Microsoft 365 tenants</p>
+      </div>
+
+      <div className="stats">
+        <div className="stat-card">
+          <div className="stat-icon">📊</div>
+          <div className="stat-label">Total Tenants</div>
+          <div className="stat-value">{tenants.length}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">✓</div>
+          <div className="stat-label">Aktive</div>
+          <div className="stat-value">{tenants.length}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">⚡</div>
+          <div className="stat-label">Status</div>
+          <div className="stat-value">{tenants.length > 0 ? 'Healthy' : 'No data'}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">📈</div>
+          <div className="stat-label">Sync Status</div>
+          <div className="stat-value">Live</div>
+        </div>
+      </div>
+
+      <div className="section">
+        <div className="section-header">
+          <h2 className="section-title">Recent Activity</h2>
+          <button onClick={() => navigate('/admin')} className="btn-primary">
+            + Add Tenant
+          </button>
+        </div>
+
+        {loading ? (
+          <p className="loading">Indlæser...</p>
+        ) : tenants.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">📭</div>
+            <div className="empty-text">Du har ingen tenants endnu</div>
+            <button onClick={() => navigate('/admin')} className="btn-primary">
+              Tilføj din første tenant
             </button>
           </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <div className="dashboard-content">
-        <div className="wrap">
-          <div className="dashboard-header">
-            <h1>Velkommen, {user?.name}!</h1>
-            <p>Få overblik over dine M365 tenants og sikkerhedsstatus</p>
+        ) : (
+          <div className="table">
+            <div className="table-header">
+              <div>Tenant</div>
+              <div>ID</div>
+              <div>Added</div>
+              <div>Status</div>
+              <div></div>
+            </div>
+            {tenants.map((tenant) => (
+              <div key={tenant.id} className="table-row">
+                <div
+                  className="tenant-name"
+                  onClick={() => navigate(`/tenant/${tenant.id}`)}
+                >
+                  {tenant.name}
+                </div>
+                <div className="badge-id">{tenant.tenantId.substring(0, 8)}...</div>
+                <div className="table-date">
+                  {new Date(tenant.addedAt).toLocaleDateString('da-DK')}
+                </div>
+                <div>
+                  <span className="badge badge-active">✓ Aktiv</span>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <button className="action-btn">⋮</button>
+                </div>
+              </div>
+            ))}
           </div>
-
-          {/* Stats Cards */}
-          <div className="stats-grid">
-            <div className="stat-card">
-              <h3>Antal tenants</h3>
-              <div className="stat-value">{tenants.length}</div>
-              <p className="stat-label">Importerede tenants</p>
-            </div>
-            <div className="stat-card">
-              <h3>Gennemsnitlig Secure Score</h3>
-              <div className="stat-value">
-                {tenants.length > 0
-                  ? Math.round(
-                      tenants.reduce((sum, t) => sum + (t.secureScore || 0), 0) / tenants.length
-                    )
-                  : '--'}
-              </div>
-              <p className="stat-label">Score point</p>
-            </div>
-            <div className="stat-card">
-              <h3>Status</h3>
-              <div className="stat-value" style={{ color: tenants.length > 0 ? '#10b981' : '#6b7280' }}>
-                {tenants.length > 0 ? '✓ Aktiv' : 'Ingen data'}
-              </div>
-              <p className="stat-label">System status</p>
-            </div>
-          </div>
-
-          {/* Tenants List */}
-          <div className="tenants-section">
-            <h2>Dine Tenants</h2>
-            {loading ? (
-              <div className="loading">Indlæser...</div>
-            ) : tenants.length === 0 ? (
-              <div className="empty-state">
-                <p>Du har ikke importeret nogen tenants endnu.</p>
-                <button onClick={() => navigate('/admin')} className="empty-state__btn">
-                  Importer din første tenant
-                </button>
-              </div>
-            ) : (
-              <div className="tenants-grid">
-                {tenants.map((tenant) => (
-                  <div key={tenant.id} className="tenant-card">
-                    <div className="tenant-card__header">
-                      <h3>{tenant.name}</h3>
-                      <span className="tenant-card__id">{tenant.tenantId?.substring(0, 8)}...</span>
-                    </div>
-                    <div className="tenant-card__content">
-                      <div className="tenant-card__item">
-                        <span className="label">Status</span>
-                        <span className="value">Aktiv</span>
-                      </div>
-                      <div className="tenant-card__item">
-                        <span className="label">Importeret</span>
-                        <span className="value">{new Date(tenant.addedAt).toLocaleDateString('da-DK')}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Action Button */}
-          {tenants.length > 0 && (
-            <div className="dashboard-actions">
-              <button onClick={() => navigate('/admin')} className="btn btn--primary">
-                Tilføj tenant
-              </button>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

@@ -1,303 +1,206 @@
-.admin {
-  position: relative;
-  min-height: 100vh;
-  background: var(--bg-deep);
-}
-
-/* =============================================
-   ADMIN NAVIGATION
-   ============================================= */
-.admin-nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(10, 17, 40, 0.95);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid var(--border);
-}
-
-.admin-nav__inner {
-  max-width: var(--max-w);
+.admin-panel {
+  padding: 40px 20px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 60px;
+  color: #f1f5fb;
 }
 
-.admin-nav__brand {
-  font-size: 18px;
+.admin-panel h1 {
+  font-size: 48px;
+  margin-bottom: 10px;
+  text-align: center;
   font-weight: 700;
-  color: var(--text-bright);
 }
 
-.admin-nav__menu {
-  display: flex;
-  gap: 32px;
-  list-style: none;
-  flex: 1;
-  margin-left: 40px;
+.admin-panel > p {
+  text-align: center;
+  color: #60a5fa;
+  margin-bottom: 40px;
+  font-size: 16px;
 }
 
-.admin-nav__menu a {
-  color: var(--text-secondary);
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: color 0.2s;
-  border-bottom: 2px solid transparent;
-  padding-bottom: 2px;
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 40px;
 }
 
-.admin-nav__menu a:hover {
-  color: var(--text-bright);
-}
-
-.admin-nav__menu a.active {
-  color: var(--blue-400);
-  border-bottom-color: var(--blue-400);
-}
-
-.admin-nav__user {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.admin-nav__avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-}
-
-.admin-nav__user span {
-  font-size: 13px;
-  color: var(--text-secondary);
-  display: none;
-}
-
-.admin-nav__logout {
-  padding: 6px 12px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  border-radius: var(--r-sm);
-  transition: all 0.2s;
-}
-
-.admin-nav__logout:hover {
-  background: var(--bg-card);
-  color: var(--text-bright);
-}
-
-@media (min-width: 768px) {
-  .admin-nav__user span {
-    display: inline;
+@media (max-width: 1024px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
   }
 }
 
-/* =============================================
-   ADMIN CONTENT
-   ============================================= */
-.admin-content {
-  position: relative;
-  z-index: 1;
-  padding: 60px 0;
+.admin-card {
+  background: #111d38;
+  border: 1px solid #1e3a5f;
+  border-radius: 12px;
+  padding: 30px;
 }
 
-.admin-header {
-  text-align: center;
-  margin-bottom: 60px;
-}
-
-.admin-header h1 {
-  font-size: 42px;
-  font-weight: 700;
-  color: var(--text-bright);
-  margin-bottom: 12px;
-}
-
-.admin-header p {
-  font-size: 16px;
-  color: var(--text-secondary);
-}
-
-/* =============================================
-   ADMIN FORM CONTAINER
-   ============================================= */
-.admin-form-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-/* =============================================
-   FORM STYLING
-   ============================================= */
-.admin-form {
-  padding: 40px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-}
-
-.admin-form h2 {
+.admin-card h2 {
   font-size: 24px;
-  font-weight: 700;
-  color: var(--text-bright);
-  margin-bottom: 32px;
+  margin-bottom: 20px;
+  color: #f1f5fb;
 }
 
 .form-group {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .form-group label {
   display: block;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
   margin-bottom: 8px;
+  font-weight: 500;
+  color: #e0e7ff;
+  font-size: 14px;
 }
 
 .form-group input {
   width: 100%;
-  padding: 12px 16px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  color: var(--text-bright);
+  padding: 12px;
+  background: #0a1128;
+  border: 1px solid #1e3a5f;
+  border-radius: 6px;
+  color: #f1f5fb;
   font-size: 14px;
-  transition: all 0.2s;
+  transition: border-color 0.2s;
   font-family: inherit;
 }
 
 .form-group input::placeholder {
-  color: var(--text-muted);
+  color: #64748b;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: var(--blue-500);
-  background: var(--bg-elevated);
-  box-shadow: 0 0 0 3px var(--blue-glow);
+  border-color: #2563eb;
 }
 
-/* =============================================
-   FORM SUBMIT & MESSAGES
-   ============================================= */
-.form-submit {
+.form-group input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-submit {
   width: 100%;
   padding: 14px;
-  background: var(--orange-500);
-  color: white;
-  border-radius: var(--r-md);
-  font-weight: 700;
-  font-size: 15px;
-  box-shadow: 0 2px 12px var(--orange-glow-strong);
-  transition: all 0.2s;
+  background: #f97316;
+  border: none;
+  border-radius: 6px;
+  color: #000;
+  font-weight: 600;
+  font-size: 16px;
   cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: 10px;
 }
 
-.form-submit:hover:not(:disabled) {
-  background: var(--orange-400);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px var(--orange-glow-strong);
+.btn-submit:hover:not(:disabled) {
+  opacity: 0.9;
 }
 
-.form-submit:disabled {
+.btn-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.message {
-  padding: 12px 16px;
-  border-radius: var(--r-md);
-  font-size: 14px;
-  margin-bottom: 24px;
-  border-left: 4px solid;
-}
-
-.message--success {
-  background: rgba(16, 185, 129, 0.1);
-  border-left-color: var(--green);
-  color: var(--green);
-}
-
-.message--error {
-  background: rgba(239, 68, 68, 0.1);
-  border-left-color: var(--red);
-  color: var(--red);
-}
-
-/* =============================================
-   ADMIN INFO
-   ============================================= */
-.admin-info {
-  padding: 32px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  height: fit-content;
-}
-
-.admin-info h3 {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text-bright);
+.error-box {
+  background: #7f1d1d;
+  border: 1px solid #dc2626;
+  border-radius: 6px;
+  padding: 12px;
   margin-bottom: 20px;
-}
-
-.admin-info ul {
-  list-style: none;
-}
-
-.admin-info li {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
+  color: #fecaca;
   font-size: 14px;
-  line-height: 1.6;
-  color: var(--text-secondary);
 }
 
-.admin-info li:last-child {
-  border-bottom: none;
+.success-box {
+  background: #1a4d2e;
+  border: 1px solid #10b981;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 20px;
+  color: #a7f3d0;
+  font-size: 14px;
 }
 
-.admin-info strong {
-  color: var(--text-primary);
+.form-help {
+  background: #0a1128;
+  border: 1px solid #1e3a5f;
+  border-radius: 6px;
+  padding: 15px;
+  margin-top: 20px;
+  font-size: 13px;
+}
+
+.form-help h4 {
+  margin: 0 0 10px 0;
+  color: #60a5fa;
+}
+
+.form-help ol {
+  margin: 0;
+  padding-left: 20px;
+  color: #cbd5e1;
+}
+
+.form-help li {
+  margin-bottom: 5px;
+}
+
+.tenants-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.tenant-item {
+  background: #0a1128;
+  border: 1px solid #1e3a5f;
+  border-radius: 6px;
+  padding: 15px;
+}
+
+.tenant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.tenant-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.tenant-status {
+  background: #10b981;
+  color: #000;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
   font-weight: 600;
 }
 
-/* =============================================
-   RESPONSIVE
-   ============================================= */
-@media (max-width: 1024px) {
-  .admin-form-container {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
+.tenant-info {
+  font-size: 13px;
+  color: #cbd5e1;
 }
 
-@media (max-width: 768px) {
-  .admin-nav__menu {
-    gap: 16px;
-    margin-left: 20px;
-  }
+.tenant-info p {
+  margin: 5px 0;
+}
 
-  .admin-header h1 {
-    font-size: 32px;
-  }
+.tenant-info strong {
+  color: #e0e7ff;
+}
 
-  .admin-form {
-    padding: 24px;
-  }
-
-  .admin-info {
-    padding: 24px;
-  }
+.loading,
+.empty {
+  color: #94a3b8;
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
 }

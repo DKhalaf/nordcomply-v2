@@ -1,173 +1,184 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useEffect } from 'react';
 import './AdminPanel.css';
 
+const API_BASE = 'https://nordcomply-api.dshvan5.workers.dev';
+
 export default function AdminPanel() {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const [tenants, setTenants] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    tenantName: '',
+    friendlyName: '',
     tenantId: '',
-    gaEmail: '',
-    gaPassword: '',
   });
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  // Fetch tenants on mount
+  useEffect(() => {
+    fetchTenants();
+    
+    // Check for success query param
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tenant_added') === 'true') {
+      setSuccess('Tenant tilføjet! Genindlæser...');
+      setTimeout(() => fetchTenants(), 2000);
+    }
+  }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage({ type: '', text: '' });
-
+  async function fetchTenants() {
     try {
-      const response = await fetch('/api/admin/import-tenant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
+      setLoading(true);
+      const response = await fetch(`${API_BASE}/api/tenants`);
+      if (!response.ok) throw new Error('Failed to fetch tenants');
       const data = await response.json();
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: `✓ ${data.message}` });
-        setFormData({ tenantName: '', tenantId: '', gaEmail: '', gaPassword: '' });
-        setTimeout(() => navigate('/dashboard'), 2000);
-      } else {
-        setMessage({ type: 'error', text: `✗ ${data.error || 'Noget gik galt'}` });
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: `✗ Fejl: ${error.message}` });
+      setTenants(data);
+    } catch (err) {
+      console.error('Error fetching tenants:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setIsSubmitting(true);
+
+    const { friendlyName, tenantId } = formData;
+
+    if (!friendlyName.trim() || !tenantId.trim()) {
+      setError('Udfyld alle felter');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Validate GUID format
+    const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!guidRegex.test(tenantId)) {
+      setError('Tenant ID er ikke et gyldigt GUID');
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      // Start OAuth flow
+      const response = await fetch(`${API_BASE}/auth/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenantId: tenantId.trim(),
+          friendlyName: friendlyName.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to start auth flow');
+      }
+
+      const { authUrl } = await response.json();
+
+      // Redirect to Microsoft login
+      setSuccess('Omdirigerer til Microsoft 365...');
+      window.location.href = authUrl;
+    } catch (err) {
+      console.error('Error:', err);
+      setError(err.message);
+      setIsSubmitting(false);
+    }
+  }
+
+  function handleInputChange(e) {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }
 
   return (
-    <div className="admin">
-      {/* Navigation */}
-      <nav className="admin-nav">
-        <div className="admin-nav__inner">
-          <div className="admin-nav__brand">
-            <span>NordComply Portal</span>
-          </div>
-          <ul className="admin-nav__menu">
-            <li><a href="/dashboard">Dashboard</a></li>
-            <li><a href="/admin" className="active">Admin</a></li>
-          </ul>
-          <div className="admin-nav__user">
-            <img src={user?.picture} alt={user?.name} className="admin-nav__avatar" />
-            <span>{user?.name}</span>
-            <button onClick={handleLogout} className="admin-nav__logout">
-              Log ud
+    <div className="admin-panel">
+      <h1>Admin Panel</h1>
+      <p>Importer dine M365 tenants for at få adgang til sikkerhedsdata</p>
+
+      <div className="admin-grid">
+        {/* Form Section */}
+        <div className="admin-card form-section">
+          <h2>Tilføj Tenant</h2>
+
+          {error && <div className="error-box">{error}</div>}
+          {success && <div className="success-box">{success}</div>}
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="friendlyName">Tenant navn</label>
+              <input
+                id="friendlyName"
+                name="friendlyName"
+                type="text"
+                placeholder="f.eks. 'Guard365 Main'"
+                value={formData.friendlyName}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="tenantId">Tenant ID (Azure GUID)</label>
+              <input
+                id="tenantId"
+                name="tenantId"
+                type="text"
+                placeholder="f.eks. b7714735-4214-4780-aa87-8b73422f7c96"
+                value={formData.tenantId}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="btn-submit"
+            >
+              {isSubmitting ? 'Godkender...' : 'Godkend & Tilføj Tenant'}
             </button>
+          </form>
+
+          <div className="form-help">
+            <h4>Hvordan finder jeg Tenant ID?</h4>
+            <ol>
+              <li>Gå til Azure Portal → Entra ID</li>
+              <li>Klik "Properties"</li>
+              <li>Kopier "Tenant ID"</li>
+            </ol>
           </div>
         </div>
-      </nav>
 
-      {/* Main Content */}
-      <div className="admin-content">
-        <div className="wrap">
-          <div className="admin-header">
-            <h1>Admin Panel</h1>
-            <p>Importer dine M365 tenants for at få adgang til sikkerhedsdata</p>
-          </div>
+        {/* Tenants List Section */}
+        <div className="admin-card tenants-section">
+          <h2>Tilsluttede Tenants</h2>
 
-          <div className="admin-form-container">
-            <form onSubmit={handleSubmit} className="admin-form">
-              <h2>Importer Tenant</h2>
-
-              <div className="form-group">
-                <label htmlFor="tenantName">Tenant Navn</label>
-                <input
-                  id="tenantName"
-                  type="text"
-                  name="tenantName"
-                  value={formData.tenantName}
-                  onChange={handleChange}
-                  placeholder="f.eks. Min Virksomhed"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="tenantId">Tenant ID (GUID)</label>
-                <input
-                  id="tenantId"
-                  type="text"
-                  name="tenantId"
-                  value={formData.tenantId}
-                  onChange={handleChange}
-                  placeholder="b7714735-4214-4780-aa87-8b73422f7c96"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="gaEmail">Global Admin Email</label>
-                <input
-                  id="gaEmail"
-                  type="email"
-                  name="gaEmail"
-                  value={formData.gaEmail}
-                  onChange={handleChange}
-                  placeholder="admin@virksomhed.onmicrosoft.com"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="gaPassword">Global Admin Adgangskode</label>
-                <input
-                  id="gaPassword"
-                  type="password"
-                  name="gaPassword"
-                  value={formData.gaPassword}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-
-              {message.text && (
-                <div className={`message message--${message.type}`}>
-                  {message.text}
+          {loading ? (
+            <p className="loading">Indlæser...</p>
+          ) : tenants.length === 0 ? (
+            <p className="empty">Ingen tenants tilføjet endnu</p>
+          ) : (
+            <div className="tenants-list">
+              {tenants.map((tenant, idx) => (
+                <div key={idx} className="tenant-item">
+                  <div className="tenant-header">
+                    <h3>{tenant.name}</h3>
+                    <span className="tenant-status">✓ Aktiv</span>
+                  </div>
+                  <div className="tenant-info">
+                    <p><strong>Tenant ID:</strong> {tenant.tenantId}</p>
+                    <p><strong>Oprettet:</strong> {new Date(tenant.addedAt).toLocaleDateString('da-DK')}</p>
+                    {tenant.id && <p><strong>Local ID:</strong> {tenant.id}</p>}
+                  </div>
                 </div>
-              )}
-
-              <button type="submit" className="form-submit" disabled={loading}>
-                {loading ? 'Importerer...' : 'Importer Tenant'}
-              </button>
-            </form>
-
-            <div className="admin-info">
-              <h3>Hjælp</h3>
-              <ul>
-                <li>
-                  <strong>Tenant ID:</strong> Find det i Azure Portal → Entra ID → Egenskaber
-                </li>
-                <li>
-                  <strong>Global Admin:</strong> Bruge en konto med Global Administrator rolle
-                </li>
-                <li>
-                  <strong>MFA:</strong> Hvis Global Admin har MFA enabled, brug en app-adgangskode i stedet
-                </li>
-                <li>
-                  <strong>Sikkerhed:</strong> Vi gemmer kun refresh token, ikke dine legitimationer
-                </li>
-              </ul>
+              ))}
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

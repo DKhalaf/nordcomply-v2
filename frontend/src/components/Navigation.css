@@ -1,0 +1,101 @@
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(15, 20, 25, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-brand {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  cursor: pointer;
+  color: var(--text-bright);
+}
+
+.nav-menu {
+  display: flex;
+  gap: 32px;
+  flex: 1;
+  margin-left: 64px;
+}
+
+.nav-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 4px;
+}
+
+.nav-link:hover {
+  color: var(--text-bright);
+}
+
+.nav-link.active {
+  color: var(--blue-500);
+  border-bottom-color: var(--blue-500);
+}
+
+.nav-right {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 18px;
+  transition: color 0.2s;
+  padding: 4px 8px;
+}
+
+.theme-toggle:hover {
+  color: var(--text-bright);
+}
+
+.nav-email {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-right: 8px;
+}
+
+.btn-logout {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  color: var(--text-bright);
+  border-color: var(--blue-500);
+}
+
+@media (max-width: 768px) {
+  .nav-menu {
+    margin-left: 32px;
+    gap: 16px;
+  }
+
+  .nav-email {
+    display: none;
+  }
+}
